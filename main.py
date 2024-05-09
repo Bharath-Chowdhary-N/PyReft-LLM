@@ -74,8 +74,19 @@ training_arguments = transformers.TrainingArguments(
     output_dir="./models",
     per_device_train_batch_size=2,
     learning_rate=0.002,
-    logging_steps=20
+    logging_steps=100
 )
+
+#trainer_module
+trainer = pyreft.ReftTrainerForCausalLM(
+    model=reft_model,
+    tokenizer=tokenizer,
+    args=training_arguments,
+    **data_module
+)
+
+#Train
+trainer.train()
 
 
 
