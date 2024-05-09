@@ -54,3 +54,9 @@ reft_config = pyreft.ReftConfig(representations = {
 
 reft_model = pyreft.get_reft_model(model, reft_config)
 reft_model.set_device('cuda')
+
+#data
+df = pd.read_csv("details.csv")
+X= df['Prompt'].values
+y=df['Response'].values
+
