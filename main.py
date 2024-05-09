@@ -1,6 +1,6 @@
 import torch, transformers, pyreft, load_dotenv, os
 from dotenv import load_dotenv
-import pd
+import pandas as pd
 from huggingface_hub import login
 login(token=os.getenv('HF_TOKEN'))
 
@@ -35,10 +35,10 @@ generation_params = {
     #'max_new_tokens': 5,  # Set max_new_tokens to the additional number of tokens you want to generate
 }
 
-prompt = prompt_template("Who is NBC?")
-tokens = tokenizer.encode(prompt, return_tensors='pt').to('cuda:0')
-response = model.generate(tokens, **generation_params)
-print(tokenizer.decode(response[0]))
+#prompt = prompt_template("Who is NBC?")
+#tokens = tokenizer.encode(prompt, return_tensors='pt').to('cuda:0')
+#response = model.generate(tokens, **generation_params)
+#print(tokenizer.decode(response[0]))
 #rint(tokenizer.decode(tokens))
 
 #get reft model
@@ -47,7 +47,7 @@ reft_config = pyreft.ReftConfig(representations = {
     "component":"block_output",
     "low_rank_dimension": 4,
     "intervention":pyreft.LoreftIntervention(
-        embed_dim = modell.config.hidden_size,
+        embed_dim = model.config.hidden_size,
         low_rank_dimension = 4
     )
 })
