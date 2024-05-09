@@ -89,8 +89,9 @@ trainer = pyreft.ReftTrainerForCausalLM(
 trainer.train()
 
 
-
-
+#save
+reft_model.set_device('cpu')
+reft_model.save(save_directory="./model_temp_save")
 
 
 
