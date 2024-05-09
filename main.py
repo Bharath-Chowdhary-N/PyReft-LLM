@@ -1,6 +1,6 @@
 import torch, transformers, pyreft, load_dotenv, os
 from dotenv import load_dotenv
-
+import pd
 from huggingface_hub import login
 login(token=os.getenv('HF_TOKEN'))
 
@@ -30,13 +30,27 @@ def prompt_template(prompt):
     return response
 
 generation_params = {
-    #'max_length': 200,  # Set max_length to accommodate the length of your input_ids
+    'max_length': 200,  # Set max_length to accommodate the length of your input_ids
     # or alternatively,
-    'max_new_tokens': 5,  # Set max_new_tokens to the additional number of tokens you want to generate
+    #'max_new_tokens': 5,  # Set max_new_tokens to the additional number of tokens you want to generate
 }
 
 prompt = prompt_template("Who is NBC?")
 tokens = tokenizer.encode(prompt, return_tensors='pt').to('cuda:0')
 response = model.generate(tokens, **generation_params)
 print(tokenizer.decode(response[0]))
-print(tokenizer.decode(tokens))
+#rint(tokenizer.decode(tokens))
+
+#get reft model
+reft_config = pyreft.ReftConfig(representations = {
+    "layer":15,
+    "component":"block_output",
+    "low_rank_dimension": 4,
+    "intervention":pyreft.LoreftIntervention(
+        embed_dim = modell.config.hidden_size,
+        low_rank_dimension = 4
+    )
+})
+
+reft_model = pyreft.get_reft_model(model, reft_config)
+reft_model.set_device('cuda')
