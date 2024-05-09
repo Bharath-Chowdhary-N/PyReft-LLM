@@ -1,11 +1,15 @@
 import torch, transformers, pyreft, load_dotenv, os
 from dotenv import load_dotenv
 
+from huggingface_hub import login
+login(token=os.getenv('HF_TOKEN'))
+
 #load dotenv 
 load_dotenv()
 
 #add and load model from hugging face
-model_name = 'nvidia/Llama3-ChatQA-1.5-8B'
+#model_name = 'nvidia/Llama3-ChatQA-1.5-8B'
+model_name = "meta-llama/Llama-2-7b-chat-hf"
 model = transformers.AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map='cuda:0', cache_dir='./cache', token=os.getenv('HF_TOKEN'))
 #Reason: torch_dtype=torch.float16 is needed to train with Cuda
 #        cache_dir is the place where the output is stored when used in cloud
@@ -25,7 +29,14 @@ def prompt_template(prompt):
                    [/INST]"""
     return response
 
+generation_params = {
+    #'max_length': 200,  # Set max_length to accommodate the length of your input_ids
+    # or alternatively,
+    'max_new_tokens': 5,  # Set max_new_tokens to the additional number of tokens you want to generate
+}
+
 prompt = prompt_template("Who is NBC?")
-tokens = tokenizer.encode(prompt, return_tensors='pt', device='cuda:0')
-response = model.generate(tokens)
-print(tokenizer.decode(response[0], skip_special_tokens=True))
+tokens = tokenizer.encode(prompt, return_tensors='pt').to('cuda:0')
+response = model.generate(tokens, **generation_params)
+print(tokenizer.decode(response[0]))
+print(tokenizer.decode(tokens))
