@@ -60,3 +60,16 @@ df = pd.read_csv("details.csv")
 X= df['Prompt'].values
 y=df['Response'].values
 
+#operation on last token
+data_module = pyreft.make_last_position_supervised_data_module(
+    tokenizer,
+    model,
+    [prompt_template(x) for x in X],
+    y
+)
+
+
+
+
+
+
