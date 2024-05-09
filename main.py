@@ -68,6 +68,17 @@ data_module = pyreft.make_last_position_supervised_data_module(
     y
 )
 
+#train args
+training_arguments = transformers.TrainingArguments(
+    num_train_epochs = 100,
+    output_dir="./models",
+    per_device_train_batch_size=2,
+    learning_rate=0.002,
+    logging_steps=20
+)
+
+
+
 
 
 
