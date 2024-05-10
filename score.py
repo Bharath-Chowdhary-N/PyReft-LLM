@@ -35,64 +35,18 @@ generation_params = {
     #'max_new_tokens': 5,  # Set max_new_tokens to the additional number of tokens you want to generate
 }
 
-#prompt = prompt_template("Who is NBC?")
-#tokens = tokenizer.encode(prompt, return_tensors='pt').to('cuda:0')
-#response = model.generate(tokens, **generation_params)
-#print(tokenizer.decode(response[0]))
-#rint(tokenizer.decode(tokens))
+prompt = prompt_template("Does BCN have a vision? if yes what is his vision")
+tokens = tokenizer(prompt, return_tensors='pt').to('cuda')
 
-#get reft model
-reft_config = pyreft.ReftConfig(representations = {
-    "layer":15,
-    "component":"block_output",
-    "low_rank_dimension": 4,
-    "intervention":pyreft.LoreftIntervention(
-        embed_dim = model.config.hidden_size,
-        low_rank_dimension = 4
-    )
-})
-
-reft_model = pyreft.get_reft_model(model, reft_config)
+reft_model = pyreft.ReftModel.load('./model_temp_save',model)
 reft_model.set_device('cuda')
 
-#data
-df = pd.read_csv("details.csv")
-X= df['Prompt'].values
-y=df['Response'].values
 
-#operation on last token
-data_module = pyreft.make_last_position_supervised_data_module(
-    tokenizer,
-    model,
-    [prompt_template(x) for x in X],
-    y
+base_unit_position = tokens['input_ids'].shape[-1]-1
+_, response = reft_model.generate(tokens, unit_locations={'sources->base':(None,[[[base_unit_position]]])}
+           , intervene_on_prompt=True
 )
 
-#train args
-training_arguments = transformers.TrainingArguments(
-    num_train_epochs = 100,
-    output_dir="./models",
-    per_device_train_batch_size=2,
-    learning_rate=0.002,
-    logging_steps=100
-)
 
-#trainer_module
-trainer = pyreft.ReftTrainerForCausalLM(
-    model=reft_model,
-    tokenizer=tokenizer,
-    args=training_arguments,
-    **data_module
-)
-
-#Train
-trainer.train()
-
-
-#save
-reft_model.set_device('cpu')
-reft_model.save(save_directory="./model_temp_save")
-
-
-
-
+print(tokenizer.decode(response[0]))
+#rint(tokenizer.decode(tokens))
